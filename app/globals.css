@@ -8,16 +8,15 @@
   --background-end-rgb: 255, 255, 255;
 }
 
-body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(to bottom right, rgba(199, 210, 254, 0.8), rgba(216, 180, 254, 0.8)),
-    rgb(var(--background-start-rgb));
+
+::-webkit-scrollbar{
+  width: 10px;
+  background-color: #1f1f1f61;
+
 }
 
-.bg-gradient-text {
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
-  background-image: linear-gradient(to right, #4f46e5, #7c3aed);
+::-webkit-scrollbar-thumb{
+  background-color: #5a5a5a;
+  height: 50px;
+  border-radius: 10px;
 }
-

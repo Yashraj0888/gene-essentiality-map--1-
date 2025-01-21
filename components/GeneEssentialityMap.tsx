@@ -10,8 +10,17 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { AlertCircle, Search } from "lucide-react"
+import { AlertCircle, Search, ChevronDown, Check } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Checkbox } from "@/components/ui/checkbox"
 
 Chart.register(ScatterController, LinearScale, PointElement, Tooltip, annotationPlugin)
 
@@ -112,15 +121,15 @@ export default function GeneEssentialityMap() {
           text: "Gene Effect",
           font: {
             size: 16,
-            weight: "bold",
-            family: "Inter, sans-serif", // Custom font
+            weight: "bold" as const,
+            family: "Inter, sans-serif",
           },
           color: theme === "dark" ? "#E5E7EB" : "#1F2937",
         },
         ticks: {
           font: {
             size: 14,
-            family: "Inter, sans-serif", // Custom font
+            family: "Inter, sans-serif",
           },
           color: theme === "dark" ? "#D1D5DB" : "#4B5563",
         },
@@ -134,8 +143,8 @@ export default function GeneEssentialityMap() {
           text: "Tissues",
           font: {
             size: 16,
-            weight: "bold",
-            family: "Inter, sans-serif", // Custom font
+            weight: "bold" as const,
+            family: "Inter, sans-serif",
           },
           color: theme === "dark" ? "#E5E7EB" : "#1F2937",
         },
@@ -145,7 +154,7 @@ export default function GeneEssentialityMap() {
           autoSkip: false,
           font: {
             size: 12,
-            family: "Inter, sans-serif", // Custom font
+            family: "Inter, sans-serif",
           },
           color: theme === "dark" ? "#D1D5DB" : "#4B5563",
         },
@@ -174,7 +183,7 @@ export default function GeneEssentialityMap() {
         bodyColor: theme === "dark" ? "#E5E7EB" : "#1F2937",
         titleFont: {
           size: 14,
-          weight: "bold",
+          weight: "bold" as const,
         },
         bodyFont: {
           size: 12,
@@ -201,7 +210,7 @@ export default function GeneEssentialityMap() {
               position: "start",
               font: {
                 size: 14,
-                weight: "bold",
+                weight: "bold" as const,
               },
               color: theme === "dark" ? "rgba(239, 68, 68, 1)" : "rgba(185, 28, 28, 1)",
             },
@@ -214,6 +223,38 @@ export default function GeneEssentialityMap() {
   const toggleTissueSelection = (tissue: string) => {
     setSelectedTissues((prev) => (prev.includes(tissue) ? prev.filter((t) => t !== tissue) : [...prev, tissue]))
   }
+
+  const TissueDropdown = () => {
+    return (
+      <DropdownMenu >
+        <DropdownMenuTrigger className="rounded-xl" asChild>
+          <Button variant="outline" className="w-48 justify-between">
+            Filter Tissues
+            <ChevronDown className="ml-2 h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="w-48 max-h-64 overflow-y-auto bg-white dark:bg-gray-800 dark:text-white">
+          <DropdownMenuLabel>Select Tissues</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          {tissues.map((tissue, index) => (
+            <DropdownMenuCheckboxItem
+              key={index}
+              checked={selectedTissues.includes(tissue)}
+              onCheckedChange={(checked) => {
+                if (checked) {
+                  setSelectedTissues((prev) => [...prev, tissue]);
+                } else {
+                  setSelectedTissues((prev) => prev.filter((t) => t !== tissue));
+                }
+              }}
+            >
+              {tissue}
+            </DropdownMenuCheckboxItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  };
 
   useEffect(() => {
     if (originalData && selectedTissues.length > 0) {
@@ -241,64 +282,83 @@ export default function GeneEssentialityMap() {
   }, [selectedTissues, originalData, theme])
 
   return (
-    <>
-      <div className="space-y-4  ">
-        <Card className=" border-gray-800 rounded-2xl dark:border-white">
-          <CardHeader>
-            <CardTitle>Gene Essentiality Map</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex space-x-4 items-center border-gray-800 rounded-full">
-              <Input
-                placeholder="Enter Ensembl Gene ID"
-                value={ensemblId}
-                onChange={(e) => setEnsemblId(e.target.value)}
-                className="w-5/6 border-gray-600 rounded-full focus:border-gray-600 focus:ring-gray-600"
-              />
-              <button
-                onClick={fetchData}
-                disabled={loading}
+    <div className="space-y-4">
+      <Card className="border-gray-800 rounded-2xl dark:border-white">
+        <CardHeader>
+          <CardTitle>Gene Essentiality Map</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex space-x-4 items-center border-gray-800 rounded-full">
+            <Input
+              placeholder="Enter Ensembl Gene ID"
+              value={ensemblId}
+              onChange={(e) => setEnsemblId(e.target.value)}
+              className="w-5/6 border-gray-600 rounded-full focus:border-gray-600 focus:ring-gray-600 dark:border-white dark:bg-gray-200 dark:text-black"
+            />
+            <button
+              onClick={fetchData}
+              disabled={loading}
+              className="bg-gray-800 text-white rounded-xl p-2 px-2 hover:bg-gray-600 transition-colors duration-200 dark:bg-gray-200 dark:text-black"
+            >
+              {loading ? "Loading..." : "Fetch Data"}
+            </button>
+          </div>
+        </CardContent>
+      </Card>
 
-                className="bg-black text-white rounded-xl p-2 px-2 hover:bg-gray-600 transition-colors duration-200 dark:bg-white text-black" 
-              >
-                {loading ? "Loading..." : "Fetch Data"}
-              </button>
+      {error && (
+        <Alert variant="destructive" className="mb-4">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+
+      {tissues.length > 0 && (
+        <div className="mt-4 ">
+          <TissueDropdown />
+          {selectedTissues.length > 0 && (
+            <div className="mt-2 flex flex-wrap gap-2">
+              {selectedTissues.map((tissue, index) => (
+                <Badge
+                  key={index}
+                  variant="secondary"
+                  className="px-2 py-1 "
+                  onClick={() => toggleTissueSelection(tissue)}
+                >
+                  {tissue}
+                  <button
+                    className="ml-1 hover:text-red-500"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedTissues((prev) => prev.filter((t) => t !== tissue));
+                    }}
+                  >
+                    ×
+                  </button>
+                </Badge>
+              ))}
             </div>
-          </CardContent>
-        </Card>
-        {error && (
-          <Alert variant="destructive" className="mb-4">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
-        {tissues.length > 0 && (
-  <div className="mt-4">
-    <div className="flex flex-wrap space-x-2">
-      {tissues.map((tissue, index) => (
-        <Button
-          key={index}
-          variant="outline"
-          onClick={() => toggleTissueSelection(tissue)}
-          className={`rounded-full m-2 
-            ${selectedTissues.includes(tissue) ? 
-              "bg-black text-white border-black" : 
-              "bg-white text-black border-gray-600"} dark:bg-gray-200 dark: text-black`}
-        >
-          {tissue}
-        </Button>
-      ))}
-    </div>
-  </div>
-)}
+          )}
+        </div>
+      )}
 
-        {chartData && (
+      {chartData && (
+        <>
+          <div className="flex justify-center mt-4 border w-fit p-2 border-gray-500 rounded-xl">
+            <div className="flex items-center space-x-4">
+              <button className="w-4 h-4 bg-blue-400 rounded-full"></button>
+              <p className="text-gray-700 dark:text-gray-200">Neutral</p>
+            </div>
+            <div className="flex items-center space-x-4 ">
+              <button className="w-4 h-4 bg-red-400 rounded-full ml-4 "></button>
+              <p className="text-gray-700 dark:text-gray-200">Dependency</p>
+            </div>
+          </div>
           <div className="relative h-[90vh]">
             <Scatter data={chartData} options={chartOptions} ref={chartRef} />
           </div>
-        )}
-        
-      </div>
-    </>
+        </>
+      )}
+    </div>
   )
 }
