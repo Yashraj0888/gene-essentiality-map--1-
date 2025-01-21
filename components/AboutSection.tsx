@@ -24,8 +24,8 @@ export function AboutSection() {
   ]
 
   return (
-    <section className="py-20">
-      <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center">Key Features</h2>
+    <section className="py-20 ">
+      <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center ">Key Features</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {features.map((feature, index) => (
           <motion.div
@@ -34,7 +34,7 @@ export function AboutSection() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: index * 0.1 }}
           >
-            <Card>
+            <Card className="border-gray-800 rounded-2xl dark:border-white ">
               <CardHeader>
                 <CardTitle>{feature.title}</CardTitle>
                 <CardDescription>{feature.description}</CardDescription>

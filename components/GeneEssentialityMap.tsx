@@ -21,6 +21,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Checkbox } from "@/components/ui/checkbox"
+import { ThemeToggle } from "./ThemeToggle"
 
 Chart.register(ScatterController, LinearScale, PointElement, Tooltip, annotationPlugin)
 
@@ -282,29 +283,32 @@ export default function GeneEssentialityMap() {
   }, [selectedTissues, originalData, theme])
 
   return (
-    <div className="space-y-4">
-      <Card className="border-gray-800 rounded-2xl dark:border-white">
-        <CardHeader>
-          <CardTitle>Gene Essentiality Map</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex space-x-4 items-center border-gray-800 rounded-full">
-            <Input
-              placeholder="Enter Ensembl Gene ID"
-              value={ensemblId}
-              onChange={(e) => setEnsemblId(e.target.value)}
-              className="w-5/6 border-gray-600 rounded-full focus:border-gray-600 focus:ring-gray-600 dark:border-white dark:bg-gray-200 dark:text-black"
-            />
-            <button
-              onClick={fetchData}
-              disabled={loading}
-              className="bg-gray-800 text-white rounded-xl p-2 px-2 hover:bg-gray-600 transition-colors duration-200 dark:bg-gray-200 dark:text-black"
-            >
-              {loading ? "Loading..." : "Fetch Data"}
-            </button>
-          </div>
-        </CardContent>
-      </Card>
+    
+    <div className="space-y-4 ">
+      
+      
+      <Card className=" border-gray-800 rounded-2xl dark:border-white ml-[0] mr-[0] lg:mr-[20vw] lg:ml-[20vw]">
+          <CardHeader>
+            <CardTitle>Gene Essentiality Map</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex space-x-4 items-center border-gray-800 rounded-full">
+              <Input
+                placeholder="Enter Ensembl Gene ID"
+                value={ensemblId}
+                onChange={(e) => setEnsemblId(e.target.value)}
+                className="w-full border-gray-600 rounded-full focus:border-gray-600 focus:ring-gray-600"
+              />
+              <button
+                onClick={fetchData}
+                disabled={loading}
+
+                className="p-2 m-2 rounded-full bg-gray-800 text-gray-300 border-gray-600 hover:bg-gray-700 hover:text-white max-h-[40px] min-w-[100px]">
+                {loading ? "Loading..." : "Fetch Data"}
+              </button>
+            </div>
+          </CardContent>
+        </Card>
 
       {error && (
         <Alert variant="destructive" className="mb-4">

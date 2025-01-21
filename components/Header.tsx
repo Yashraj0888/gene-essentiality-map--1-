@@ -6,6 +6,8 @@ import { useTheme } from "next-themes"
 import { Button } from "@/components/ui/button"
 import { Moon, Sun, Menu, X, Github } from "lucide-react"
 import { motion } from "framer-motion"
+import Image from "next/image"
+
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false)
@@ -14,8 +16,9 @@ export function Header() {
   return (
     <header className="py-4 px-4 md:px-6 bg-background">
       <div className="container mx-auto flex justify-between items-center">
-        <Link href="/" className="text-2xl font-bold">
-          GeneMap
+        <Link href="/" className=" flex text-2xl font-bold  gap-2">
+         <Image src="../gene.png" alt="GeneMap Logo" width={30} height={30} />
+         GeneMap
         </Link>
         <div className="hidden md:flex space-x-4 items-center">
           <NavItems />
