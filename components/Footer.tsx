@@ -9,13 +9,13 @@ export function Footer() {
             <p>&copy; 2023 GeneMap. All rights reserved.</p>
           </div>
           <nav className="flex space-x-4">
-            <Link href="/privacy" className="hover:text-primary transition-colors">
+            <Link href="/" className="hover:text-primary transition-colors">
               Privacy Policy
             </Link>
-            <Link href="/terms" className="hover:text-primary transition-colors">
+            <Link href="/" className="hover:text-primary transition-colors">
               Terms of Service
             </Link>
-            <Link href="/contact" className="hover:text-primary transition-colors">
+            <Link href="/" className="hover:text-primary transition-colors">
               Contact Us
             </Link>
           </nav>
