@@ -8,9 +8,14 @@ import { Header } from "@/components/Header"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata = {
-  title: "Gene Essentiality Map",
+  title: "GeneMap",
   description: "Visualize gene essentiality across different tissues",
+  icons: {
+    icon: "../gene.png", // This references the favicon in the public folder
+  },
+
 }
+
 
 export default function RootLayout({
   children,
