@@ -2,8 +2,7 @@
 
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
-import Link from "next/link" 
-import { AlertButton } from "yashrajsinghbutton"
+import Link from "next/link"
 
 export function HeroSection() {
   return (

@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@aganitha/gene-essentiality-chart": "^1.0.0",
     "@hookform/resolvers": "^3.9.1",
     "@radix-ui/react-accordion": "^1.2.2",
     "@radix-ui/react-alert-dialog": "^1.1.4",
@@ -43,11 +44,12 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "1.0.4",
-    "date-fns": "4.1.0",
+    "date-fns": "^3.0.0",
     "embla-carousel-react": "8.5.1",
     "framer-motion": "latest",
+    "gene-essentiality-chart": "^1.0.0",
     "input-otp": "1.4.1",
-    "lucide-react": "^0.454.0",
+    "lucide-react": "^0.263.1",
     "next": "14.2.16",
     "next-themes": "latest",
     "react": "^18",
@@ -61,7 +63,6 @@
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^0.9.6",
-    "yashrajsinghbutton": "^1.0.0",
     "zod": "^3.24.1"
   },
   "devDependencies": {
