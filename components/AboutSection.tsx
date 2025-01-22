@@ -26,6 +26,8 @@ export function AboutSection() {
   return (
     <section className="py-20 ">
       <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center ">Key Features</h2>
+      <div className="absolute left-0 bottom-0 w-0 h-[2px] dark:bg-white bg-gray-800 transition-all duration-300 ease-in-out group-hover:w-full group-hover:left-0"></div>
+       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {features.map((feature, index) => (
           <motion.div

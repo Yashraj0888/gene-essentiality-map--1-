@@ -2,7 +2,8 @@
 
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
-import Link from "next/link"
+import Link from "next/link" 
+import { AlertButton } from "yashrajsinghbutton"
 
 export function HeroSection() {
   return (
@@ -33,7 +34,11 @@ export function HeroSection() {
             Get Started
           </Button>
         </Link>
-      </motion.div>
+      </motion.div> 
+      {/* <AlertButton 
+      text="Click for greeting" 
+      alertMessage="Hello from my package!"
+    /> */}
     </section>
   )
 }

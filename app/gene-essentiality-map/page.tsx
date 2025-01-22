@@ -1,4 +1,5 @@
-import GeneEssentialityMap from '@/components/GeneEssentialityMap'
+
+import MainGeneMap from '@/components/Main'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import React from 'react'
 
@@ -6,7 +7,7 @@ const page = () => {
   return (
     <div className='m-10 mt-10 '>
     
-      <GeneEssentialityMap/>
+      <MainGeneMap/>
     </div>
   )
 }

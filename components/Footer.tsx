@@ -6,7 +6,7 @@ export function Footer() {
       <div className="container mx-auto ">
         <div className="flex flex-col md:flex-row justify-between items-center">
           <div className="">
-            <p>&copy; 2023 GeneMap. All rights reserved.</p>
+            <p>&copy; 2025 GeneMap. Made with 💕.  All rights reserved.</p>
           </div>
           <nav className="flex space-x-4">
             <Link href="/" className="hover:text-primary transition-colors">

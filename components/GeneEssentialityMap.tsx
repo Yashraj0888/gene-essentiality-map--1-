@@ -1,17 +1,11 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
+import { useRef, useEffect, useState } from "react"
 import { Chart, ScatterController, LinearScale, PointElement, Tooltip } from "chart.js"
 import { Scatter } from "react-chartjs-2"
 import annotationPlugin from "chartjs-plugin-annotation"
-import { motion } from "framer-motion"
 import { useTheme } from "next-themes"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { AlertCircle, Search, ChevronDown, Check } from "lucide-react"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -20,49 +14,84 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Checkbox } from "@/components/ui/checkbox"
-import { ThemeToggle } from "./ThemeToggle"
+import { Button } from "@/components/ui/button"
+import { ChevronDown } from "lucide-react"
 
 Chart.register(ScatterController, LinearScale, PointElement, Tooltip, annotationPlugin)
 
-export default function GeneEssentialityMap() {
-  const [ensemblId, setEnsemblId] = useState("ENSG00000012048")
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState("")
+const API_URL = "https://api.platform.opentargets.org/api/v4/graphql"
+
+
+interface GeneEssentialityChartProps {
+  ensemblId: string;
+  setLoading: (loading: boolean) => void;
+  setError: (error: string) => void;
+}
+
+
+export const GeneEssentialityChart = ({
+  ensemblId,
+  setLoading,
+  setError
+
+}: GeneEssentialityChartProps) => {
   const [chartData, setChartData] = useState<any>(null)
   const [tissues, setTissues] = useState<string[]>([])
   const [selectedTissues, setSelectedTissues] = useState<string[]>([])
   const [originalData, setOriginalData] = useState<any>(null)
   const chartRef = useRef<Chart | null>(null)
   const { theme } = useTheme()
-
+  
   const fetchData = async () => {
+    if (!ensemblId) return;
+    
     setLoading(true)
     setError("")
     setChartData(null)
-    setTissues([]) 
+    setTissues([])
     setSelectedTissues([])
     setOriginalData(null)
-    
 
     try {
-      const response = await fetch("/api/fetchEssentialityData", {
+      const response = await fetch(API_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ensemblId }),
+        body: JSON.stringify({
+          query: `
+            query Depmap($ensemblId: String!) {
+              target(ensemblId: $ensemblId) {
+                depMapEssentiality {
+                  tissueName
+                  screens {
+                    depmapId
+                    cellLineName
+                    diseaseFromSource
+                    geneEffect
+                    expression
+                  }
+                }
+              }
+            }
+          `,
+          variables: { ensemblId },
+        }),
       })
 
       if (!response.ok) {
-        throw new Error("Please enter a valid Ensembl ID")
+        throw new Error("Failed to fetch data from Open Targets API")
       }
 
-      const data = await response.json()
+      const { data, errors } = await response.json()
 
-      if (data.error) {
-        throw new Error(data.error)
+      if (errors) {
+        throw new Error(errors[0].message)
       }
 
-      const essentialityData = data.essentialityData
+      if (!data?.target?.depMapEssentiality) {
+        throw new Error("No essentiality data found for this gene")
+      }
+
+      const essentialityData = data.target.depMapEssentiality
       const uniqueTissues = [...new Set(essentialityData.map((item: any) => item.tissueName))]
       setTissues(uniqueTissues)
 
@@ -104,19 +133,41 @@ export default function GeneEssentialityMap() {
       setLoading(false)
     }
   }
+
   useEffect(() => {
-    if(ensemblId){
+  
       fetchData()
-    }
     
   }, [ensemblId])
 
-  const getPointColor = (geneEffect: number, currentTheme: string | undefined, alpha = 0.6) => {
-    if (geneEffect <= -1) {
-      return `rgba(239, 68, 68, ${alpha})` // Red for dependency
-    } else {
-      return `rgba(59, 130, 246, ${alpha})` // Blue for non-dependency
+  useEffect(() => {
+    if (originalData && selectedTissues.length > 0) {
+      const filteredData = originalData.datasets[0].data.filter((point: any) =>
+        selectedTissues.includes(point.tissue)
+      )
+      setChartData({
+        datasets: [
+          {
+            ...originalData.datasets[0],
+            data: filteredData,
+            backgroundColor: filteredData.map((point: any) => getPointColor(point.x, theme)),
+            borderColor: filteredData.map((point: any) => getPointColor(point.x, theme, 1)),
+          },
+        ],
+      })
+    } else if (originalData) {
+      setChartData(originalData)
     }
+  }, [selectedTissues, originalData, theme])
+
+  const toggleTissueSelection = (tissue: string) => {
+    setSelectedTissues((prev) => (prev.includes(tissue) ? prev.filter((t) => t !== tissue) : [...prev, tissue]))
+  }
+
+  const getPointColor = (geneEffect: number, currentTheme: string | undefined, alpha = 0.6) => {
+    return geneEffect <= -1
+      ? `rgba(239, 68, 68, ${alpha})`
+      : `rgba(59, 130, 246, ${alpha})`
   }
 
   const chartOptions = {
@@ -228,10 +279,6 @@ export default function GeneEssentialityMap() {
     },
   }
 
-  const toggleTissueSelection = (tissue: string) => {
-    setSelectedTissues((prev) => (prev.includes(tissue) ? prev.filter((t) => t !== tissue) : [...prev, tissue]))
-  }
-
   const TissueDropdown = () => {
     return (
       <DropdownMenu >
@@ -289,63 +336,27 @@ export default function GeneEssentialityMap() {
     }
   }, [selectedTissues, originalData, theme])
 
-
-
   return (
-    <div className="space-y-4">
-      <Card className="border-gray-800 rounded-2xl dark:border-white ml-[0] mr-[0] lg:mr-[20vw] lg:ml-[20vw]">
-        <CardHeader className="flex flex-row items-center justify-center pb-2">
-          <CardTitle className="sm:text-4xl md:text-4xl font-bold mb-6">Gene Essentiality Map</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {/* Add animation classes for smooth transition */}
-          <div
-            className={`flex justify-center space-x-4 items-center border-gray-800 rounded-full transition-all duration-500 ${
-              loading ? "transform scale-95" : "transform scale-100"
-            }`}
-          >
-            <Input
-              placeholder="Enter Ensembl Gene ID"
-              value={ensemblId}
-              onChange={(e) => setEnsemblId(e.target.value)}
-              className="w-full border-gray-600 rounded-full focus:border-gray-600 focus:ring-gray-600"
-            />
-            <button
-              onClick={fetchData}
-              disabled={loading}
-              className="p-2 m-2 rounded-full bg-gray-800 text-gray-300 border-gray-600 hover:bg-gray-700 hover:text-white max-h-[40px] min-w-[100px]"
-            >
-              {loading ? "Loading..." : "Fetch Data"}
-            </button>
-          </div>
-        </CardContent>
-      </Card>
-
-      {error && (
-        <Alert variant="destructive" className="mb-4">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
-
+    <>
       {tissues.length > 0 && (
-        <div className="mt-4 ">
+        <div className="mt-4">
           <TissueDropdown />
+
           {selectedTissues.length > 0 && (
             <div className="mt-2 flex flex-wrap gap-2">
               {selectedTissues.map((tissue, index) => (
                 <Badge
                   key={index}
                   variant="secondary"
-                  className="px-2 py-1 "
+                  className="px-2 py-1"
                   onClick={() => toggleTissueSelection(tissue)}
                 >
                   {tissue}
                   <button
                     className="ml-1 hover:text-red-500"
                     onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedTissues((prev) => prev.filter((t) => t !== tissue));
+                      e.stopPropagation()
+                      toggleTissueSelection(tissue)
                     }}
                   >
                     ×
@@ -365,13 +376,15 @@ export default function GeneEssentialityMap() {
                 <button className="w-4 h-4 bg-blue-400 rounded-full"></button>
                 <p className="text-gray-700 dark:text-gray-200">Neutral</p>
               </div>
-              <div className="flex items-center space-x-4 ">
-                <button className="w-4 h-4 bg-red-400 rounded-full ml-4 "></button>
+              <div className="flex items-center space-x-4">
+                <button className="w-4 h-4 bg-red-400 rounded-full ml-4"></button>
                 <p className="text-gray-700 dark:text-gray-200">Dependency</p>
               </div>
             </div>
             <div>
-              <h1 className="text-center mt-4 text-2xl font-bold">Gene Effect/Tissue Dependency chart</h1>
+              <h1 className="text-center mt-4 text-2xl font-bold">
+                Gene Effect/Tissues Dependency Chart
+              </h1>
             </div>
           </div>
           <div className="relative h-[90vh]">
@@ -379,6 +392,6 @@ export default function GeneEssentialityMap() {
           </div>
         </>
       )}
-    </div>
-  );
+    </>
+  )
 }
