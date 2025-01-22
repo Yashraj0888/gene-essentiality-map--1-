@@ -4,7 +4,7 @@ import { useState } from "react"
 import { ThemeProvider } from "../components/ThemeProvider"
 import { ThemeToggle } from "../components/ThemeToggle"
 import { Button } from "@/components/ui/button"
-import GeneEssentialityMap from "@/components/GeneEssentialityMap"
+
 import { useRouter } from "next/navigation"
 import { HeroSection } from "@/components/HeroSection"
 import { Footer } from "@/components/Footer"

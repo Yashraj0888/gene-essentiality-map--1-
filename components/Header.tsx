@@ -39,7 +39,7 @@ export function Header() {
           className="md:hidden mt-4 py-4 bg-background"
         >
           <NavItems mobile />
-          <div className="flex justify-center mt-4 space-x-4">
+          <div className="flex justify-center items-center mt-4 space-x-4">
             <ThemeToggle />
             <GithubLink />
           </div>

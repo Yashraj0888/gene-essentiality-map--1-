@@ -6,16 +6,90 @@
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;
   --background-end-rgb: 255, 255, 255;
+  
+  /* Light mode background and gradient */
+  --bg-light: #DCD9D4;
+  --bg-light-gradient: linear-gradient(to bottom, rgba(255,255,255,0.15) 0%, rgba(0,0,0,0.15) 100%), 
+                       radial-gradient(at top center, rgba(255,255,255,0.40) 0%, rgba(0,0,0,0.40) 120%) #989898;
+  --background-blend-mode-light: multiply, multiply;
+
+  /* Dark mode background and gradient */
+  --bg-dark: #1f1f1f; /* Dark background color */
+  --bg-dark-gradient: linear-gradient(to bottom, rgba(255,255,255,0.10) 0%, rgba(0,0,0,0.30) 100%), 
+                      radial-gradient(at top center, rgba(255,255,255,0.20) 0%, rgba(0,0,0,0.60) 120%) #333333;
+  --background-blend-mode-dark: multiply, multiply;
+}
+
+/* global.css or your main CSS file */
+
+body {
+  background-color: #DCD9D4; /* Light mode default background */
+  background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.15) 0%, rgba(0, 0, 0, 0.15) 100%),
+                    radial-gradient(at top center, rgba(255, 255, 255, 0.40) 0%, rgba(0, 0, 0, 0.40) 120%) #989898;
+  background-blend-mode: multiply, multiply;
+}
+
+/* Dark Mode Background Customization */
+body.dark {
+  background-color: #1f1f1f; /* Dark background color */
+  background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.10) 0%, rgba(0, 0, 0, 0.30) 100%),
+                    radial-gradient(at top center, rgba(255, 255, 255, 0.20) 0%, rgba(0, 0, 0, 0.60) 120%) #333333;
+  background-blend-mode: multiply, multiply;
 }
 
 
-::-webkit-scrollbar{
+/* Color for the hover effect */
+:root {
+  --color: rgb(91, 91, 91); /* Main color */
+  --color-dark: #3b3b3b; /* Darkened color for the background */
+}
+
+.button {
+  display: inline-block;
+  position: relative;
+  color: #fff;
+  font-size: 1rem;
+  letter-spacing: 0.15rem;
+  text-transform: uppercase;
+  font-weight: 600;
+  transition: all 0.3s;
+
+  padding: 0.75rem 1.25rem;
+}
+
+.button::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--color);
+  z-index: -2;
+}
+
+.button::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0%;
+  height: 100%;
+  background-color: var(--color-dark);
+  transition: all 0.3s;
+  z-index: -1;
+}
+
+.button:hover::before {
+  width: 100%;
+}
+
+::-webkit-scrollbar {
   width: 10px;
   background-color: #1f1f1f61;
-
 }
 
-::-webkit-scrollbar-thumb{
+::-webkit-scrollbar-thumb {
   background-color: #5a5a5a;
   height: 50px;
   border-radius: 10px;

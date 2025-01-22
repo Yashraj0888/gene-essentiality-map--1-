@@ -1,34 +1,37 @@
-"use client"
+"use client";
 
-import { motion } from "framer-motion"
-import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { motion } from "framer-motion";
+import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import SpotlightCard from './StyleComponents/SpotlightCard';
 
 export function AboutSection() {
   const features = [
     {
       title: "Interactive Visualization",
-      description: "Explore gene essentiality data through an intuitive and interactive scatter plot.",
+      description:
+        "Dive into gene essentiality data with an engaging and interactive scatter plot. Effortlessly zoom, pan, and hover over data points for detailed insights, making your analysis more intuitive and efficient.",
     },
     {
       title: "Multi-tissue Analysis",
-      description: "Compare gene dependencies across various tissues and cell lines.",
+      description:
+        "Analyze gene dependencies across a wide variety of tissues and cell lines. Compare data seamlessly to uncover patterns and trends across different biological systems, all in one unified interface.",
     },
     {
       title: "Data Filtering",
-      description: "Easily filter and focus on specific tissues or gene effect ranges.",
+      description:
+        "Easily filter large datasets to focus on specific tissues, gene effect ranges, or other key parameters. Save time and enhance precision by narrowing down the data to what truly matters.",
     },
     {
       title: "Responsive Design",
-      description: "Access and analyze data seamlessly on any device, from desktop to mobile.",
+      description:
+        "Our responsive design ensures a smooth experience on any device. Whether you're on a desktop, tablet, or smartphone, access and analyze data with ease and flexibility.",
     },
-  ]
+  ];
 
   return (
-    <section className="py-20 ">
-      <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center ">Key Features</h2>
-      <div className="absolute left-0 bottom-0 w-0 h-[2px] dark:bg-white bg-gray-800 transition-all duration-300 ease-in-out group-hover:w-full group-hover:left-0"></div>
-       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+    <section className="py-20 flex flex-col items-center justify-center">
+      <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center">Key Features</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 ">
         {features.map((feature, index) => (
           <motion.div
             key={index}
@@ -36,16 +39,19 @@ export function AboutSection() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: index * 0.1 }}
           >
-            <Card className="border-gray-800 rounded-2xl dark:border-white ">
-              <CardHeader>
-                <CardTitle>{feature.title}</CardTitle>
-                <CardDescription>{feature.description}</CardDescription>
-              </CardHeader>
-            </Card>
+            
+            <SpotlightCard className="custom-spotlight-card h-[200px]"spotlightColor="rgb(72, 61, 139), rgb(255, 105, 180)"
+
+
+            >
+                <i className="fa fa-lock"></i>
+                <h2 className="text-2xl font-semibold mb-3 text-white ">{feature.title}</h2>
+                <p className="text-white">{feature.description}</p>
+            </SpotlightCard>
           </motion.div>
         ))}
+        
       </div>
     </section>
-  )
+  );
 }
-

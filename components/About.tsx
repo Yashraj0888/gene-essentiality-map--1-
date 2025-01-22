@@ -116,13 +116,15 @@ export function About() {
         transition={{ duration: 1, delay: 1.8 }}
       >
         <Link href="/gene-essentiality-map">
-          <Button 
-            size="lg" 
-            className="animate-pulse bg-gray-800 text-white hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-300 rounded-xl transition-colors duration-800"
-          >
-            Start Exploring Now
-          </Button>
-        </Link>
+  <div className="relative inline-block">
+    <Button
+      size="lg"
+      className="animate-bounce button text-white uppercase font-semibold text-sm px-6 py-3 rounded-3xl relative overflow-hidden "
+    >
+      Get Started
+    </Button>
+  </div>
+</Link>
       </motion.div>
     </section>
   )

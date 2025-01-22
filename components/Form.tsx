@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AlertCircle } from "lucide-react"
+import ReactiveButton from 'reactive-button';
 
 interface GeneSearchFormProps {
   setEnsemblId: (id: string) => void;
@@ -15,6 +16,7 @@ interface GeneSearchFormProps {
 
 export const GeneSearchForm = ({ setEnsemblId, loading, error }: GeneSearchFormProps) => {
   const [inputValue, setInputValue] = useState("ENSG00000139618")
+  const [isDark, setIsDark] = useState(false)
 
   const handleSearch = () => {
     setEnsemblId(inputValue)
@@ -52,13 +54,15 @@ export const GeneSearchForm = ({ setEnsemblId, loading, error }: GeneSearchFormP
               onKeyDown={handleKeyDown}
               className="w-full border-gray-600 rounded-full focus:border-gray-600 focus:ring-gray-600"
             />
-            <button
+            <ReactiveButton
+              buttonState={loading ? 'loading' : 'idle'}
+              idleText={'Fetch Data'}
+              loadingText={'Loading'}
               onClick={handleSearch}
-              disabled={loading}
-              className="p-2 m-2 rounded-full bg-gray-800 text-gray-300 border-gray-600 hover:bg-gray-700 hover:text-white max-h-[40px] min-w-[100px]"
-            >
-              {loading ? "Loading..." : "Fetch Data"}
-            </button>
+              rounded={true}
+              color="dark"
+            />
+            
           </div>
         </CardContent>
       </Card>
