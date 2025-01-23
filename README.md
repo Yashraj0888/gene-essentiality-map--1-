@@ -76,35 +76,7 @@ You can test the application with the following genes and their corresponding En
     * The `GeneEssentialityChart` component should receive props related to the EnsemblID, loading state, and error. Ideally, the `GeneSearchForm` component should properly pass these props to the `GeneEssentialityChart`.
     * `GeneEssentialityChart` should handle state updates and provide information to the form to display relevant UI hints for errors and loading states.
 
-Example:
-```js
-"use client"
 
-import { useState } from "react"
-import { GeneSearchForm } from "./Form"
-import { GeneEssentialityChart } from "@aganitha/GeneEssentialityMap"
-
-export default function MainGeneMap() {
-  const [ensemblId, setEnsemblId] = useState("")
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState("")
-
-  return (
-    <div className="space-y-4">
-      <GeneSearchForm
-        setEnsemblId={setEnsemblId}
-        loading={loading}
-        error={error}
-      />
-      <GeneEssentialityChart
-        ensemblId={ensemblId}
-        setLoading={setLoading}
-        setError={setError}
-      />
-    </div>
-  )
-}
-```
 
 ### How to Download the npm Package
 If you directly download the package from the `https://npmboot.svc.aganitha.ai/` npm repository, it will not include all required dependencies, so it won't work properly.
@@ -138,9 +110,39 @@ After ensuring all required dependencies are installed, remove the package initi
 #### Step 6 - Import the package
 ```js
 import { GeneEssentialityChart } from '@aganitha/gene-essentiality-chart'
-```
+``` 
 
-*Note: Tailwind CSS is required for proper styling of this component.*
+
+<mark> *Note: Tailwind CSS is required for proper styling of this component.* </mark>
+
+Example:
+```js
+
+import { useState } from "react"
+import { GeneSearchForm } from "./Form"
+import { GeneEssentialityChart } from "@aganitha/GeneEssentialityMap"
+
+export default function MainGeneMap() {
+  const [ensemblId, setEnsemblId] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
+
+  return (
+    <div className="space-y-4">
+      <GeneSearchForm
+        setEnsemblId={setEnsemblId}
+        loading={loading}
+        error={error}
+      />
+      <GeneEssentialityChart
+        ensemblId={ensemblId}
+        setLoading={setLoading}
+        setError={setError}
+      />
+    </div>
+  )
+}
+```
 
 ## Testing
 
