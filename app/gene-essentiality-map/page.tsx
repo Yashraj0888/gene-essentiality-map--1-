@@ -1,5 +1,5 @@
 
-import MainGeneMap from '@/components/Main'
+import MainGeneMap from '@/components/MainGeneMap'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import React from 'react'
 

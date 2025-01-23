@@ -3,7 +3,7 @@
 
 import { useState } from "react"
 import { GeneSearchForm } from "./Form"
-import { GeneEssentialityChart } from "@aganitha/gene-essentiality-chart"
+import { GeneEssentialityChart } from "./GeneEssentialityMap"
 
 
 export default function MainGeneMap() {
