@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import SpotlightCard from './StyleComponents/SpotlightCard';
+import SpotlightCard from './StyleComponents/SpotlightCard';//reatsbits
 
 export function AboutSection() {
   const features = [
