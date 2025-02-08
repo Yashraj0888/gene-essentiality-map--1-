@@ -9,7 +9,6 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@aganitha/gene-essentiality-chart": "^1.0.0",
     "@hookform/resolvers": "^3.9.1",
     "@radix-ui/react-accordion": "^1.2.2",
     "@radix-ui/react-alert-dialog": "^1.1.4",
@@ -50,11 +49,13 @@
     "date-fns": "4.1.0",
     "embla-carousel-react": "8.5.1",
     "framer-motion": "latest",
-    "gene-essentiality-chart": "^1.0.0",
+    "gene-essentiality-chart": "^1.0.3",
+    "i": "^0.3.7",
     "input-otp": "1.4.1",
     "lucide-react": "^0.454.0",
     "next": "14.2.16",
     "next-themes": "latest",
+    "npm": "^11.1.0",
     "react": "^18",
     "react-chartjs-2": "latest",
     "react-day-picker": "8.10.1",
