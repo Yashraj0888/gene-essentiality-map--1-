@@ -764,7 +764,7 @@ export const GeneEssentialityChart = ({
               <div className="flex flex-col items-center mt-4">
                 <div className="relative w-full">
                   <TissueDropdown
-                    tissues={tissues.sort((a, b) => a.localeCompare(b))}
+                    tissues={tissues}
                     selectedTissues={selectedTissues.sort((a, b) =>
                       a.localeCompare(b)
                     )}
