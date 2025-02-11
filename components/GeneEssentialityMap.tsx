@@ -104,28 +104,26 @@ const TissueDropdown = memo(
           className="flex items-center justify-between w-48 px-4 py-2 text-gray-600 rounded-xl text-sm font-medium bg-white border dark:bg-transparent dark:text-gray-300 border-gray-300 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2"
         >
           Filter Tissues
-          <ChevronDown className="w-5 h-5 ml-2 -mr" aria-hidden="true" />
+          <ChevronDown className="w-5 h-5 ml-2 mr-1" aria-hidden="true" />
         </button>
 
         {isOpen && (
           <div className="absolute left-0 mt-2 w-48 bg-white shadow-lg ring-1 ring-black ring-opacity-5 z-50 dark:bg-gray-800 rounded-xl">
             <div className="py-1 max-h-64 overflow-y-auto">
               {tissues.map((tissue, index) => (
-                <div
+                <label
                   key={index}
                   className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:bg-transparent dark:text-gray-300 cursor-pointer"
-                  onClick={() => onTissueToggle(tissue)}
                 >
                   <input
                     type="checkbox"
                     checked={selectedTissues.includes(tissue)}
                     onChange={() => onTissueToggle(tissue)}
                     className="h-3 w-3 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    onClick={(e) => e.stopPropagation()} // Prevents parent div click interference
                   />
-                  <label className="ml-3 flex-grow cursor-pointer">
-                    {tissue}
-                  </label>
-                </div>
+                  <span className="ml-3 flex-grow">{tissue}</span>
+                </label>
               ))}
             </div>
           </div>
@@ -134,6 +132,7 @@ const TissueDropdown = memo(
     );
   }
 );
+
 
 export const GeneEssentialityChart = ({
   ensemblId,
