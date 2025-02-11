@@ -78,7 +78,7 @@ const SearchBar = memo(
             onChange={handleSelectChange}
             onFocus={() => setIsDropdownOpen(true)}
             onBlur={handleBlur}
-            className="block appearance-none cursor-pointer w-full px-3 py-2 border border-gray-300 rounded-xl text-gray-600 dark:text-gray-300 leading-5 bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+            className="block appearance-none cursor-pointer dark:bg-transparent w-full px-3 py-2 border border-gray-300 rounded-xl text-gray-600 dark:text-gray-300 leading-5 bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
           >
             <option
               value="depmapId"
