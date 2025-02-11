@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState, memo } from "react";
+import { useRef, useEffect, useState, memo, useCallback } from "react";
 import {
   Chart,
   ScatterController,
@@ -52,59 +52,147 @@ const SearchBar = memo(
     onSearchChange,
     searchField,
     onSearchFieldChange,
-  }: SearchBarProps) => (
-    <div className="flex flex-col space-y-2 w-full max-w-md sm:w-auto mt-5">
-      <div className="relative">
-        <select
-          value={searchField}
-          onChange={(e) => onSearchFieldChange(e.target.value as keyof DataPoint)}
-          className="block appearance-none cursor-pointer w-full px-3 py-2 border border-gray-300 rounded-xl text-gray-600 dark:text-gray-300 leading-5 bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-transparent"
-        >
-          <option className="dark:text-gray-300 dark:bg-gray-800" value="depmapId">DepMap ID</option>
-          <option className="dark:text-gray-300 dark:bg-gray-800" value="cellLineName">Cell Line Name</option>
-          <option className="dark:text-gray-300 dark:bg-gray-800" value="diseaseFromSource">Disease</option>
-          <option className="dark:text-gray-300 dark:bg-gray-800" value="geneEffect">Gene Effect</option>
-          <option className="dark:text-gray-300 dark:bg-gray-800" value="expression">Expression</option>
-        </select>
+  }: SearchBarProps) => {
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-        <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
-          <ChevronDown className="w-5 h-5 mr-1 text-gray-500 dark:text-gray-300" aria-hidden="true" />
-        </div>
-      </div>
+    const handleSelectChange = useCallback(
+      (e: React.ChangeEvent<HTMLSelectElement>) => {
+        onSearchFieldChange(e.target.value as keyof DataPoint);
+        setIsDropdownOpen(false);
+      },
+      [onSearchFieldChange]
+    );
 
-      <div className="relative rounded-lg">
-        <input
-          type="text"
-          value={searchTerm}
-          onChange={(e) => onSearchChange(e.target.value)}
-          className="block dark:bg-transparent dark:text-gray-300 dark:placeholder:text-gray-200 w-full px-3 py-2 border border-gray-300 leading-5 rounded-xl bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-          placeholder="Search..."
-        />
-      </div>
-    </div>
-  )
-);
-
-const TissueDropdown = memo(
-  ({
-    tissues,
-    selectedTissues,
-    onTissueToggle,
-  }: {
-    tissues: string[];
-    selectedTissues: string[];
-    onTissueToggle: (tissue: string) => void;
-  }) => {
-    const [isOpen, setIsOpen] = useState(false);
+    const handleBlur = useCallback(() => {
+      // Use requestAnimationFrame to ensure this runs after any click events
+      requestAnimationFrame(() => {
+        setIsDropdownOpen(false);
+      });
+    }, []);
 
     return (
-      <div className="relative inline-block text-left w-full">
+      <div className="flex flex-col space-y-2 w-full max-w-md sm:w-auto mt-5">
+        <div className="relative">
+          <select
+            value={searchField}
+            onChange={handleSelectChange}
+            onFocus={() => setIsDropdownOpen(true)}
+            onBlur={handleBlur}
+            className="block appearance-none cursor-pointer w-full px-3 py-2 border border-gray-300 rounded-xl text-gray-600 dark:text-gray-300 leading-5 bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+          >
+            <option
+              value="depmapId"
+              className="dark:text-gray-300 dark:bg-gray-800"
+            >
+              DepMap ID
+            </option>
+            <option
+              value="cellLineName"
+              className="dark:text-gray-300 dark:bg-gray-800"
+            >
+              Cell Line Name
+            </option>
+            <option
+              value="diseaseFromSource"
+              className="dark:text-gray-300 dark:bg-gray-800"
+            >
+              Disease
+            </option>
+            <option
+              value="geneEffect"
+              className="dark:text-gray-300 dark:bg-gray-800"
+            >
+              Gene Effect
+            </option>
+            <option
+              value="expression"
+              className="dark:text-gray-300 dark:bg-gray-800"
+            >
+              Expression
+            </option>
+          </select>
+          <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              className={`w-5 h-5 ml-1 text-gray-500 dark:text-gray-300 transition-transform duration-200 ${
+                isDropdownOpen ? "rotate-180" : "rotate-0"
+              }`}
+              aria-hidden="true"
+            >
+              <path
+                fillRule="evenodd"
+                d="M19.53 8.47a.75.75 0 0 1 0 1.06l-7 7a.75.75 0 0 1-1.06 0l-7-7a.75.75 0 1 1 1.06-1.06L12 14.44l6.47-6.47a.75.75 0 0 1 1.06 0z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </div>
+        </div>
+        <div className="relative rounded-lg">
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => onSearchChange(e.target.value)}
+            className="block w-full px-3 py-2 border border-gray-300 leading-5 rounded-xl bg-white dark:bg-transparent dark:text-gray-300 placeholder-gray-500 dark:placeholder:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+            placeholder="Search..."
+          />
+        </div>
+      </div>
+    );
+  }
+);
+
+SearchBar.displayName = "SearchBar";
+
+interface TissueDropdownProps {
+  tissues: string[];
+  selectedTissues: string[];
+  onTissueToggle: (tissue: string) => void;
+}
+
+const TissueDropdown = memo(
+  ({ tissues, selectedTissues, onTissueToggle }: TissueDropdownProps) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const dropdownRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+      const handleClickOutside = (event: MouseEvent) => {
+        if (
+          dropdownRef.current &&
+          !dropdownRef.current.contains(event.target as Node)
+        ) {
+          setIsOpen(false);
+        }
+      };
+
+      document.addEventListener("mousedown", handleClickOutside);
+      return () =>
+        document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
+    return (
+      <div className="relative inline-block text-left w-full" ref={dropdownRef}>
         <button
           onClick={() => setIsOpen(!isOpen)}
           className="flex items-center justify-between w-48 px-4 py-2 text-gray-600 rounded-xl text-sm font-medium bg-white border dark:bg-transparent dark:text-gray-300 border-gray-300 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2"
         >
           Filter Tissues
-          <ChevronDown className="w-5 h-5 ml-2 mr-1" aria-hidden="true" />
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            className={`w-5 h-5 transition-transform duration-200 ${
+              isOpen ? "rotate-180" : "rotate-0"
+            }`}
+            aria-hidden="true"
+          >
+            <path
+              fillRule="evenodd"
+              d="M19.53 8.47a.75.75 0 0 1 0 1.06l-7 7a.75.75 0 0 1-1.06 0l-7-7a.75.75 0 1 1 1.06-1.06L12 14.44l6.47-6.47a.75.75 0 0 1 1.06 0z"
+              clipRule="evenodd"
+            />
+          </svg>
         </button>
 
         {isOpen && (
@@ -113,14 +201,14 @@ const TissueDropdown = memo(
               {tissues.map((tissue, index) => (
                 <label
                   key={index}
-                  className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:bg-transparent dark:text-gray-300 cursor-pointer"
+                  className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300 cursor-pointer"
                 >
                   <input
                     type="checkbox"
                     checked={selectedTissues.includes(tissue)}
                     onChange={() => onTissueToggle(tissue)}
                     className="h-3 w-3 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                    onClick={(e) => e.stopPropagation()} // Prevents parent div click interference
+                    onClick={(e) => e.stopPropagation()}
                   />
                   <span className="ml-3 flex-grow">{tissue}</span>
                 </label>
@@ -133,6 +221,7 @@ const TissueDropdown = memo(
   }
 );
 
+TissueDropdown.displayName = "TissueDropdown";
 
 export const GeneEssentialityChart = ({
   ensemblId,
@@ -146,7 +235,8 @@ export const GeneEssentialityChart = ({
   const [theme] = useState<"light" | "dark">("light");
   const chartRef = useRef<Chart<"scatter", any[], unknown> | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [searchField, setSearchField] = useState<keyof DataPoint>("cellLineName");
+  const [searchField, setSearchField] =
+    useState<keyof DataPoint>("cellLineName");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedPoint, setSelectedPoint] = useState<DataPoint | null>(null);
 
@@ -160,19 +250,21 @@ export const GeneEssentialityChart = ({
       "DepMap ID",
       "Disease",
       "Gene Effect",
-      "Expression"
+      "Expression",
     ];
 
     const csvContent = [
       headers.join(","),
-      ...data.map((point: DataPoint) => [
-        `"${point.tissue}"`,
-        `"${point.cellLine}"`,
-        `"${point.depmapId}"`,
-        `"${point.disease}"`,
-        point.geneEffect,
-        point.expression || "N/A"
-      ].join(","))
+      ...data.map((point: DataPoint) =>
+        [
+          `"${point.tissue}"`,
+          `"${point.cellLine}"`,
+          `"${point.depmapId}"`,
+          `"${point.disease}"`,
+          point.geneEffect,
+          point.expression || "N/A",
+        ].join(",")
+      ),
     ].join("\n");
 
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
@@ -194,11 +286,10 @@ export const GeneEssentialityChart = ({
   };
 
   const handleTissueToggle = (tissue: string) => {
-    setSelectedTissues(
-      (prev) =>
-        prev.includes(tissue)
-          ? prev.filter((t) => t !== tissue)
-          : [tissue, ...prev]
+    setSelectedTissues((prev) =>
+      prev.includes(tissue)
+        ? prev.filter((t) => t !== tissue)
+        : [tissue, ...prev]
     );
   };
 
@@ -254,9 +345,9 @@ export const GeneEssentialityChart = ({
       String(point[searchField] || "")
         .toLowerCase()
         .includes(searchTerm.toLowerCase());
-    
+
     const isSelected = selectedPoint?.depmapId === point.depmapId;
-    
+
     if (isSelected) return 8;
     return isHighlighted ? 6 : 4;
   };
@@ -441,7 +532,7 @@ export const GeneEssentialityChart = ({
       if (elements.length > 0) {
         const dataIndex = elements[0].index;
         const clickedPoint = chartData.datasets[0].data[dataIndex];
-        setSelectedPoint(prevPoint =>
+        setSelectedPoint((prevPoint) =>
           prevPoint?.depmapId === clickedPoint.depmapId ? null : clickedPoint
         );
       } else {
@@ -500,9 +591,9 @@ export const GeneEssentialityChart = ({
     plugins: {
       tooltip: {
         enabled: true,
-        mode: 'nearest',
+        mode: "nearest",
         intersect: true,
-        position: 'nearest',
+        position: "nearest",
         external: (context: any) => {
           if (selectedPoint && context.tooltip.dataPoints) {
             const dataPoint = context.tooltip.dataPoints[0].raw;
@@ -570,10 +661,10 @@ export const GeneEssentialityChart = ({
     if (chartRef.current && selectedPoint) {
       const chart = chartRef.current;
       const dataset = chart.data.datasets[0];
-      const index = dataset.data.findIndex((point: DataPoint) => 
-        point.depmapId === selectedPoint.depmapId
+      const index = dataset.data.findIndex(
+        (point: DataPoint) => point.depmapId === selectedPoint.depmapId
       );
-      
+
       if (index !== -1) {
         chart.setActiveElements([{ datasetIndex: 0, index }]);
         const meta = chart.getDatasetMeta(0);
@@ -596,61 +687,71 @@ export const GeneEssentialityChart = ({
                 onClick={exportToCSV}
                 className="flex items-center space-x-2 px-4 py-2 bg-gray-500 text-white rounded-xl hover:bg-gray-600 dark:bg-gray-200 dark:text-gray-800 dark:hover:bg-gray-300 transition-colors ml-3 mt-4"
               >
-                <Download className="w-4 h-4" />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  className="w-4 h-4"
+                  aria-hidden="true"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M12 3.75a.75.75 0 0 1 .75.75v9.69l3.22-3.22a.75.75 0 0 1 1.06 1.06l-4.5 4.5a.75.75 0 0 1-1.06 0l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.22 3.22V4.5a.75.75 0 0 1 .75-.75zM4.5 18a.75.75 0 0 1 .75-.75h13.5a.75.75 0 0 1 0 1.5H5.25A.75.75 0 0 1 4.5 18z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+
                 <span>Export CSV</span>
               </button>
 
               <div className="flex flex-col justify-center mt-4 border w-fit p-2 ml-3 border-gray-500 rounded-xl">
-                {[
-                  "Neutral",
-                  "Dependency",
-                  "Selected Neu",
-                  "Selected Dep",
-                ].map((category) => (
-                  <div
-                    key={category}
-                    className="flex items-center space-x-4 ml-3 dark:text-white"
-                  >
-                    <input
-                      type="checkbox"
-                      id={category}
-                      checked={selectedCategories.includes(category)}
-                      onChange={() => {
-                        setSelectedCategories((prev) =>
-                          prev.includes(category)
-                            ? prev.filter((c) => c !== category)
-                            : [...prev, category]
-                        );
-                      }}
-                      className="form-checkbox h-4 w-4 text-blue-600"
-                    />
-                    <label
-                      htmlFor={category}
-                      className="flex items-center cursor-pointer"
+                {["Neutral", "Dependency", "Selected Neu", "Selected Dep"].map(
+                  (category) => (
+                    <div
+                      key={category}
+                      className="flex items-center space-x-4 ml-3 dark:text-white"
                     >
-                      <div
-                        className={`w-4 h-4 rounded-full dark:text-white mr-2 ${
-                          category === "Neutral"
-                            ? "bg-blue-400"
-                            : category === "Dependency"
-                            ? "bg-red-400"
-                            : category === "Selected Neu"
-                            ? "bg-green-500"
-                            : "bg-yellow-500"
-                        }`}
-                      ></div>
-                      <p
-                        className={`text-gray-700 dark:text-gray-200 ${
-                          selectedCategories.includes(category)
-                            ? "font-bold"
-                            : ""
-                        }`}
+                      <input
+                        type="checkbox"
+                        id={category}
+                        checked={selectedCategories.includes(category)}
+                        onChange={() => {
+                          setSelectedCategories((prev) =>
+                            prev.includes(category)
+                              ? prev.filter((c) => c !== category)
+                              : [...prev, category]
+                          );
+                        }}
+                        className="form-checkbox h-4 w-4 text-blue-600"
+                      />
+                      <label
+                        htmlFor={category}
+                        className="flex items-center cursor-pointer"
                       >
-                        {category}
-                      </p>
-                    </label>
-                  </div>
-                ))}
+                        <div
+                          className={`w-4 h-4 rounded-full dark:text-white mr-2 ${
+                            category === "Neutral"
+                              ? "bg-blue-400"
+                              : category === "Dependency"
+                              ? "bg-red-400"
+                              : category === "Selected Neu"
+                              ? "bg-green-500"
+                              : "bg-yellow-500"
+                          }`}
+                        ></div>
+                        <p
+                          className={`text-gray-700 dark:text-gray-200 ${
+                            selectedCategories.includes(category)
+                              ? "font-bold"
+                              : ""
+                          }`}
+                        >
+                          {category}
+                        </p>
+                      </label>
+                    </div>
+                  )
+                )}
               </div>
 
               <SearchBar
@@ -664,49 +765,73 @@ export const GeneEssentialityChart = ({
                 <div className="relative w-full">
                   <TissueDropdown
                     tissues={tissues.sort((a, b) => a.localeCompare(b))}
-                    selectedTissues={selectedTissues.sort((a, b) => a.localeCompare(b))}
+                    selectedTissues={selectedTissues.sort((a, b) =>
+                      a.localeCompare(b)
+                    )}
                     onTissueToggle={handleTissueToggle}
                   />
                 </div>
 
-                {tissues.length > 0 && (
-                  <div className="mt-4 mr-3 relative">
-                    {selectedTissues.length > 0 && (
-                      <div className="mt-2">
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="gap-2 w-fit">
-                            {selectedTissues
-                              .sort((a, b) => a.localeCompare(b))
-                              .map((tissue, index) => (
-                                <span
-                                  key={index}
-                                  className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700"
+                {tissues.length > 0 && selectedTissues.length > 0 && (
+                  <div className="mt-4">
+                    <div className="relative flex items-start">
+                      <div className="flex-grow pr-10">
+                        <div className="flex flex-wrap gap-2">
+                          {selectedTissues
+                            .sort((a, b) => a.localeCompare(b))
+                            .map((tissue, index) => (
+                              <span
+                                key={index}
+                                className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
+                              >
+                                {tissue}
+                                <button
+                                  type="button"
+                                  className="flex-shrink-0 ml-1.5 h-4 w-4 rounded-full inline-flex items-center justify-center text-gray-400 hover:bg-gray-200 hover:text-gray-500 focus:outline-none focus:bg-gray-500 focus:text-white dark:hover:bg-gray-600"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleTissueToggle(tissue);
+                                  }}
                                 >
-                                  {tissue}
-                                  <button
-                                    type="button"
-                                    className="flex-shrink-0 ml-1.5 h-4 w-4 rounded-full inline-flex items-center justify-center text-gray-400 hover:bg-gray-200 hover:text-gray-500 focus:outline-none focus:bg-gray-500 focus:text-white"
-                                    onClick={() => handleTissueToggle(tissue)}
-                                  >
-                                    <span className="sr-only">
-                                      Remove tissue filter
-                                    </span>
-                                    ×
-                                  </button>
-                                </span>
-                              ))}
-                          </div>
-                          <button
-                            onClick={() => setSelectedTissues([])}
-                            className="p-1.5 hover:bg-gray-100 rounded-full transition-colors ml-2 absolute right-0 top-[-5px]"
-                            title="Clear all filters"
-                          >
-                            <Trash2 className="h-4 w-4 text-red-500 hover:text-red-700" />
-                            <span className="sr-only">Clear all filters</span>
-                          </button>
+                                  <span className="sr-only">
+                                    Remove tissue filter
+                                  </span>
+                                  ×
+                                </button>
+                              </span>
+                            ))}
                         </div>
                       </div>
-                    )}
+                      <div className="absolute right-0 top-0">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedTissues([]);
+                          }}
+                          className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
+                          title="Clear all filters"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="h-4 w-4 text-red-500 hover:text-red-700"
+                            aria-hidden="true"
+                          >
+                            <polyline points="3 6 5 6 21 6" />
+                            <path d="M19 6l-.867 12.142A2 2 0 0 1 16.138 20H7.862a2 2 0 0 1-1.995-1.858L5 6" />
+                            <path d="M10 11v6" />
+                            <path d="M14 11v6" />
+                            <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+                          </svg>
+                          <span className="sr-only">Clear all filters</span>
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
