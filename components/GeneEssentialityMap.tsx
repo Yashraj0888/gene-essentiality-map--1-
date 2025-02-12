@@ -8,7 +8,6 @@ import {
 } from "chart.js";
 import { Scatter } from "react-chartjs-2";
 import annotationPlugin from "chartjs-plugin-annotation";
-import { ChevronDown, Trash2, Download } from "lucide-react";
 
 Chart.register(
   ScatterController,
@@ -64,7 +63,6 @@ const SearchBar = memo(
     );
 
     const handleBlur = useCallback(() => {
-      // Use requestAnimationFrame to ensure this runs after any click events
       requestAnimationFrame(() => {
         setIsDropdownOpen(false);
       });
@@ -175,7 +173,7 @@ const TissueDropdown = memo(
       <div className="relative inline-block text-left w-full" ref={dropdownRef}>
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="flex items-center justify-between w-48 px-4 py-2 text-gray-600 rounded-xl text-sm font-medium bg-white border dark:bg-transparent dark:text-gray-300 border-gray-300 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2"
+          className="flex items-center justify-between w-full px-4 py-2 text-gray-600 rounded-xl text-sm font-medium bg-white border dark:bg-transparent dark:text-gray-300 border-gray-300 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2"
         >
           Filter Tissues
           <svg
@@ -196,7 +194,7 @@ const TissueDropdown = memo(
         </button>
 
         {isOpen && (
-          <div className="absolute left-0 mt-2 w-48 bg-white shadow-lg ring-1 ring-black ring-opacity-5 z-50 dark:bg-gray-800 rounded-xl">
+          <div className="absolute  mt-2  bg-white shadow-lg ring-1 ring-black ring-opacity-5 z-50 dark:bg-gray-800 rounded-xl">
             <div className="py-1 max-h-64 overflow-y-auto">
               {tissues.map((tissue, index) => (
                 <label
@@ -239,6 +237,45 @@ export const GeneEssentialityChart = ({
     useState<keyof DataPoint>("cellLineName");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedPoint, setSelectedPoint] = useState<DataPoint | null>(null);
+  const [sidebarWidth, setSidebarWidth] = useState(300);
+  const [isResizing, setIsResizing] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const previousWidthRef = useRef(sidebarWidth);
+  const resizeRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isResizing) return;
+      const newWidth = e.clientX;
+      if (newWidth >= 200 && newWidth <= window.innerWidth * 0.8) {
+        setSidebarWidth(newWidth);
+      }
+    };
+
+    const handleMouseUp = () => {
+      setIsResizing(false);
+    };
+
+    if (isResizing) {
+      document.addEventListener("mousemove", handleMouseMove);
+      document.addEventListener("mouseup", handleMouseUp);
+    }
+
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [isResizing]);
+
+  const toggleSidebar = () => {
+    setIsSidebarCollapsed(!isSidebarCollapsed);
+    if (isSidebarCollapsed) {
+      setSidebarWidth(previousWidthRef.current);
+    } else {
+      previousWidthRef.current = sidebarWidth;
+      setSidebarWidth(40);
+    }
+  };
 
   const exportToCSV = () => {
     if (!chartData || !chartData.datasets[0].data) return;
@@ -678,14 +715,51 @@ export const GeneEssentialityChart = ({
   }, [selectedPoint]);
 
   return (
-    <>
-      <div className="flex items-center sm:space-y-4 lg:justify-start lg:space-x-4 lg:items-start w-[100%]">
-        {chartData && (
-          <>
-            <div className="flex mr-4 flex-col relative left-0 top-0 items-start sm:space-y-4 dark:text-white lg:justify-start lg:space-x-4 lg:items-start h-[100%]">
+    <div className="flex h-screen w-full">
+      <div
+        style={{
+          width: `${sidebarWidth}px`,
+          minWidth: isSidebarCollapsed ? "40px" : "200px",
+          maxWidth: "80%",
+          transition: isResizing ? "none" : "width 0.3s ease",
+        }}
+        className="flex flex-col bg-transparent dark:bg-transparent border-r border-gray-200 dark:border-gray-700"
+      >
+        <div className="flex justify-end p-2">
+          <button
+            onClick={toggleSidebar}
+            className="p-2  hover:bg-gray-300 bg-slate-300 rounded-xl dark:hover:bg-gray-300 dark:bg-gray-200"
+            title={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              className={`w-6 h-6 dark:text-gray-900 transition-transform duration-300 ${
+                isSidebarCollapsed ? "rotate-180" : ""
+              }`}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
+            </svg>
+          </button>
+        </div>
+
+        <div
+          className={`flex-1 overflow-y-auto ${
+            isSidebarCollapsed ? "hidden" : ""
+          }`}
+        >
+          {chartData && (
+            <div className="p-4 space-y-4">
               <button
                 onClick={exportToCSV}
-                className="flex items-center space-x-2 px-4 py-2 bg-gray-500 text-white rounded-xl hover:bg-gray-600 dark:bg-gray-200 dark:text-gray-800 dark:hover:bg-gray-300 transition-colors ml-3 mt-4"
+                className="flex items-center space-x-2 px-4 py-2 bg-gray-500 text-white rounded-xl hover:bg-gray-600 dark:bg-gray-200 dark:text-gray-800 dark:hover:bg-gray-300 transition-colors"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -700,17 +774,13 @@ export const GeneEssentialityChart = ({
                     clipRule="evenodd"
                   />
                 </svg>
-
                 <span>Export CSV</span>
               </button>
 
-              <div className="flex flex-col justify-center mt-4 border w-fit p-2 ml-3 border-gray-500 rounded-xl">
+              <div className="border rounded-xl p-4 space-y-2">
                 {["Neutral", "Dependency", "Selected Neu", "Selected Dep"].map(
                   (category) => (
-                    <div
-                      key={category}
-                      className="flex items-center space-x-4 ml-3 dark:text-white"
-                    >
+                    <div key={category} className="flex items-center space-x-3">
                       <input
                         type="checkbox"
                         id={category}
@@ -726,10 +796,10 @@ export const GeneEssentialityChart = ({
                       />
                       <label
                         htmlFor={category}
-                        className="flex items-center cursor-pointer"
+                        className="flex items-center cursor-pointer text-sm"
                       >
                         <div
-                          className={`w-4 h-4 rounded-full dark:text-white mr-2 ${
+                          className={`w-3 h-3 rounded-full mr-2 ${
                             category === "Neutral"
                               ? "bg-blue-400"
                               : category === "Dependency"
@@ -738,16 +808,8 @@ export const GeneEssentialityChart = ({
                               ? "bg-green-500"
                               : "bg-yellow-500"
                           }`}
-                        ></div>
-                        <p
-                          className={`text-gray-700 dark:text-gray-200 ${
-                            selectedCategories.includes(category)
-                              ? "font-bold"
-                              : ""
-                          }`}
-                        >
-                          {category}
-                        </p>
+                        />
+                        {category}
                       </label>
                     </div>
                   )
@@ -761,88 +823,75 @@ export const GeneEssentialityChart = ({
                 onSearchFieldChange={handleSearchFieldChange}
               />
 
-              <div className="flex flex-col items-center mt-4">
-                <div className="relative w-full">
-                  <TissueDropdown
-                    tissues={tissues}
-                    selectedTissues={selectedTissues.sort((a, b) =>
-                      a.localeCompare(b)
-                    )}
-                    onTissueToggle={handleTissueToggle}
-                  />
-                </div>
+              <TissueDropdown
+                tissues={tissues}
+                selectedTissues={selectedTissues}
+                onTissueToggle={handleTissueToggle}
+              />
 
-                {tissues.length > 0 && selectedTissues.length > 0 && (
-                  <div className="mt-4">
-                    <div className="relative flex items-start">
-                      <div className="flex-grow pr-10">
-                        <div className="flex flex-wrap gap-2">
-                          {selectedTissues
-                            .sort((a, b) => a.localeCompare(b))
-                            .map((tissue, index) => (
-                              <span
-                                key={index}
-                                className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
-                              >
-                                {tissue}
-                                <button
-                                  type="button"
-                                  className="flex-shrink-0 ml-1.5 h-4 w-4 rounded-full inline-flex items-center justify-center text-gray-400 hover:bg-gray-200 hover:text-gray-500 focus:outline-none focus:bg-gray-500 focus:text-white dark:hover:bg-gray-600"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleTissueToggle(tissue);
-                                  }}
-                                >
-                                  <span className="sr-only">
-                                    Remove tissue filter
-                                  </span>
-                                  ×
-                                </button>
-                              </span>
-                            ))}
-                        </div>
-                      </div>
-                      <div className="absolute right-0 top-0">
+              {selectedTissues.length > 0 && (
+                <div className="border rounded-xl p-4 relative">
+                  <div className="flex flex-wrap gap-2 pr-8">
+                    {selectedTissues.map((tissue) => (
+                      <span
+                        key={tissue}
+                        className="inline-flex items-center px-2.5 py-1 rounded-full text-xs bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
+                      >
+                        {tissue}
                         <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedTissues([]);
-                          }}
-                          className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
-                          title="Clear all filters"
+                          onClick={() => handleTissueToggle(tissue)}
+                          className="ml-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
                         >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="h-4 w-4 text-red-500 hover:text-red-700"
-                            aria-hidden="true"
-                          >
-                            <polyline points="3 6 5 6 21 6" />
-                            <path d="M19 6l-.867 12.142A2 2 0 0 1 16.138 20H7.862a2 2 0 0 1-1.995-1.858L5 6" />
-                            <path d="M10 11v6" />
-                            <path d="M14 11v6" />
-                            <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
-                          </svg>
-                          <span className="sr-only">Clear all filters</span>
+                          ×
                         </button>
-                      </div>
-                    </div>
+                      </span>
+                    ))}
                   </div>
-                )}
-              </div>
+                  <button
+                    onClick={() => setSelectedTissues([])}
+                    className="absolute top-3 right-3 p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
+                    title="Clear all filters"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="h-4 w-4 text-red-500 hover:text-red-700"
+                      aria-hidden="true"
+                    >
+                      <polyline points="3 6 5 6 21 6" />
+                      <path d="M19 6l-.867 12.142A2 2 0 0 1 16.138 20H7.862a2 2 0 0 1-1.995-1.858L5 6" />
+                      <path d="M10 11v6" />
+                      <path d="M14 11v6" />
+                      <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+                    </svg>
+                    <span className="sr-only">Clear all filters</span>
+                  </button>
+                </div>
+              )}
             </div>
-            <div className="relative h-[80vh] w-[100%] border-l-2 border-gray-500 p-2">
-              <Scatter data={chartData} options={chartOptions} ref={chartRef} />
-            </div>
-          </>
+          )}
+        </div>
+      </div>
+
+      <div
+        ref={resizeRef}
+        className="w-1 cursor-col-resize bg-gray-200 hover:bg-blue-500 active:bg-blue-600 transition-colors"
+        onMouseDown={() => setIsResizing(true)}
+      />
+
+      <div className="flex-1 overflow-hidden">
+        {chartData && (
+          <div className="h-full w-full p-4">
+            <Scatter data={chartData} options={chartOptions} ref={chartRef} />
+          </div>
         )}
       </div>
-    </>
+    </div>
   );
 };
 
