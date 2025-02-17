@@ -44,6 +44,14 @@ interface SearchBarProps {
   searchField: keyof DataPoint;
   onSearchFieldChange: (value: keyof DataPoint) => void;
 }
+// The `SearchBar` component is a memoized functional component that provides a search bar and dropdown menu for filtering data points in the `GeneEssentialityMap` component. It accepts the following props:
+
+// - `searchTerm`: The current search term entered by the user.
+// - `onSearchChange`: A callback function to update the search term.
+// - `searchField`: The currently selected search field (e.g. "DepMap ID", "Cell Line Name", etc.).
+// - `onSearchFieldChange`: A callback function to update the selected search field.
+
+// The component manages the state of the dropdown menu using the `isDropdownOpen` state variable and the `handleSelectChange` and `handleBlur` callback functions. The dropdown menu allows the user to select the search field, and the search input field allows the user to enter a search term.
 
 const SearchBar = memo(
   ({
@@ -51,7 +59,7 @@ const SearchBar = memo(
     onSearchChange,
     searchField,
     onSearchFieldChange,
-  }: SearchBarProps) => {
+  }: SearchBarProps): JSX.Element => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
     const handleSelectChange = useCallback(
@@ -138,8 +146,7 @@ const SearchBar = memo(
         </div>
       </div>
     );
-  }
-);
+  });
 
 SearchBar.displayName = "SearchBar";
 
@@ -149,6 +156,16 @@ interface TissueDropdownProps {
   onTissueToggle: (tissue: string) => void;
 }
 
+// The `TissueDropdown` component is a reusable dropdown menu that allows users to select one or more tissues from a list. It is used within the `GeneEssentialityMap` component to filter the data displayed in the chart.
+
+// The component takes in three props:
+// - `tissues`: an array of strings representing the available tissues
+// - `selectedTissues`: an array of strings representing the currently selected tissues
+// - `onTissueToggle`: a function that is called when a tissue is selected or deselected, with the tissue name as the argument
+
+// The component renders a button that, when clicked, opens a dropdown menu displaying the list of tissues. Users can select or deselect tissues by clicking the corresponding checkboxes. The dropdown menu is positioned absolutely and is closed when the user clicks outside of it.
+
+// The component uses the `memo` higher-order component to memoize the component and prevent unnecessary re-renders.
 const TissueDropdown = memo(
   ({ tissues, selectedTissues, onTissueToggle }: TissueDropdownProps) => {
     const [isOpen, setIsOpen] = useState(false);
@@ -225,6 +242,7 @@ export const GeneEssentialityChart = ({
   ensemblId,
   setLoading,
   setError,
+
 }: GeneEssentialityChartProps) => {
   const [chartData, setChartData] = useState<any>(null);
   const [tissues, setTissues] = useState<string[]>([]);
@@ -244,6 +262,8 @@ export const GeneEssentialityChart = ({
   const resizeRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+
+
     const handleMouseMove = (e: MouseEvent) => {
       if (!isResizing) return;
       const newWidth = e.clientX;
@@ -329,53 +349,117 @@ export const GeneEssentialityChart = ({
         : [tissue, ...prev]
     );
   };
-
   const getPointColor = (
     point: DataPoint,
     currentTheme: string | undefined,
-    alpha = 0.6
+    alpha = 0.6  // Default alpha for initial state
   ) => {
-    const isHighlighted =
-      searchTerm &&
+    // Base colors with specified alpha values
+    const colors = {
+      dependency: {
+        normal: `rgba(239, 68, 68, ${alpha})`,    // Initial alpha 0.6
+        faded: 'rgba(239, 68, 68, 0.1)',          // Faded state alpha 0.4
+        highlighted: 'rgba(234, 179, 8, 0.8)',       // Highlighted stays full opacity
+      },
+      neutral: {
+        normal: `rgba(59, 130, 246, ${alpha})`,   // Initial alpha 0.6
+        faded: 'rgba(59, 130, 246, 0.1)',         // Faded state alpha 0.4
+        highlighted: 'rgba(34, 197, 94, 0.8)',       // Highlighted stays full opacity
+      }
+    };
+  
+    const isHighlighted = searchTerm && 
       String(point[searchField] || "")
         .toLowerCase()
         .includes(searchTerm.toLowerCase());
-
+  
+    const isDependency = point.geneEffect <= -1;
+    const colorSet = isDependency ? colors.dependency : colors.neutral;
+  
+    // If we have active category filters
     if (selectedCategories.length > 0) {
-      const matchesCategory = selectedCategories.some((category) => {
-        if (category === "Neutral" && point.geneEffect > -1) return true;
-        if (category === "Dependency" && point.geneEffect <= -1) return true;
-        if (
-          category === "Selected Neu" &&
-          isHighlighted &&
-          point.geneEffect > -1
-        )
-          return true;
-        if (
-          category === "Selected Dep" &&
-          isHighlighted &&
-          point.geneEffect <= -1
-        )
-          return true;
-        return false;
+      const matchesCategory = selectedCategories.some(category => {
+        switch (category) {
+          case "Neutral":
+            return point.geneEffect > -1;
+          case "Dependency":
+            return point.geneEffect <= -1;
+          case "Selected Neu":
+            return isHighlighted && point.geneEffect > -1;
+          case "Selected Dep":
+            return isHighlighted && point.geneEffect <= -1;
+          default:
+            return false;
+        }
       });
-
+  
+      // If point doesn't match any selected category, return faded color (0.5)
       if (!matchesCategory) {
-        return "rgba(200, 200, 200, 0.1)";
+        return colorSet.faded;
       }
+  
+      // If point matches and is highlighted, return highlighted color
+      if (isHighlighted) {
+        return colorSet.highlighted;
+      }
+  
+      // If point matches but isn't highlighted, return normal color (0.6)
+      return colorSet.normal;
     }
-
-    if (isHighlighted) {
-      return point.geneEffect <= -1
-        ? `rgba(234, 179, 8, 1)`
-        : `rgba(34, 197, 94, 1)`;
+  
+    // If no categories are selected but there's a search term
+    if (searchTerm) {
+      return isHighlighted ? colorSet.highlighted : colorSet.faded;
     }
-
-    return point.geneEffect <= -1
-      ? `rgba(239, 68, 68, ${alpha})`
-      : `rgba(59, 130, 246, ${alpha})`;
+  
+    // Default case: no filters active (0.6)
+    return colorSet.normal;
   };
-
+  
+  // Update the chart dataset to use the new color system
+  useEffect(() => {
+    if (originalData) {
+      let filteredData = [...originalData.datasets[0].data];
+  
+      // Apply tissue filter if any
+      if (selectedTissues.length > 0) {
+        filteredData = filteredData.filter((point: DataPoint) =>
+          selectedTissues.includes(point.tissue)
+        );
+      }
+  
+      setChartData({
+        datasets: [
+          {
+            ...originalData.datasets[0],
+            data: filteredData,
+            backgroundColor: filteredData.map((point: DataPoint) =>
+              getPointColor(point, theme)
+            ),
+            borderColor: filteredData.map((point: DataPoint) =>
+              getPointColor(point, theme, 1)
+            ),
+            borderWidth: filteredData.map((point: DataPoint) =>
+              String(point[searchField] || "")
+                .toLowerCase()
+                .includes(searchTerm.toLowerCase()) ? 2 : 1
+            ),
+            pointRadius: filteredData.map((point: DataPoint) =>
+              getPointRadius(point)
+            ),
+          },
+        ],
+      });
+    }
+  }, [
+    selectedTissues,
+    searchTerm,
+    searchField,
+    originalData,
+    theme,
+    selectedCategories,
+    selectedPoint,
+  ]);
   const getPointRadius = (point: DataPoint) => {
     const isHighlighted =
       searchTerm &&
@@ -577,6 +661,7 @@ export const GeneEssentialityChart = ({
       }
     },
     scales: {
+      
       x: {
         title: {
           display: true,
@@ -728,7 +813,7 @@ export const GeneEssentialityChart = ({
         <div className="flex justify-end p-2">
           <button
             onClick={toggleSidebar}
-            className="p-2  hover:bg-gray-300 bg-slate-300 rounded-xl dark:hover:bg-gray-300 dark:bg-gray-200"
+            className="p-2 bg-transparent rounded-full focus:outline-none"
             title={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
             <svg
@@ -759,7 +844,7 @@ export const GeneEssentialityChart = ({
             <div className="p-4 space-y-4">
               <button
                 onClick={exportToCSV}
-                className="flex items-center space-x-2 px-4 py-2 bg-gray-500 text-white rounded-xl hover:bg-gray-600 dark:bg-gray-200 dark:text-gray-800 dark:hover:bg-gray-300 transition-colors"
+                className="flex items-center space-x-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-xl transition-colors"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"

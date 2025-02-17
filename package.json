@@ -49,7 +49,7 @@
     "date-fns": "4.1.0",
     "embla-carousel-react": "8.5.1",
     "framer-motion": "latest",
-    "gene-essentiality-chart": "^2.0.1",
+    "gene-essentiality-chart": "^3.0.6",
     "i": "^0.3.7",
     "input-otp": "1.4.1",
     "lucide-react": "^0.454.0",
